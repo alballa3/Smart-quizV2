@@ -1,5 +1,5 @@
+import { hash } from "bun";
 import mongoose, { Schema } from "mongoose";
-
 const session = new Schema({
   token: {
     type: String,
@@ -44,6 +44,14 @@ const userSchama = new Schema(
   },
   { timestamps: true }
 );
+
+userSchama.pre("save", function (next) {
+  if (!this.isModified("password")) {
+    return next();
+  }
+  this.password = hash(this.password).toString();
+  next();
+});
 
 const userModel = mongoose.model("User", userSchama);
 
