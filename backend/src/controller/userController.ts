@@ -1,9 +1,9 @@
 import type { Request, Response } from "express";
-import { z } from "zod";
+import { any, z } from "zod";
 import jwt from "jsonwebtoken";
 import userModel from "../model/userModel";
 import mongoose, { Mongoose, MongooseError } from "mongoose";
-const generateToken = (playload: object, expiresIn: string | number) => {
+const generateToken = (playload: object) => {
   const sercet = process.env.JWT_SECRET;
   if (!sercet) {
     throw new Error(
@@ -11,7 +11,7 @@ const generateToken = (playload: object, expiresIn: string | number) => {
     );
   }
   return jwt.sign(playload, sercet, {
-    expiresIn: expiresIn || "1d",
+    expiresIn: "30d",
   });
 };
 
@@ -33,13 +33,13 @@ export const register = async (req: Request, res: Response) => {
   }
   // CREATE TOKEN AND STORE IT
   const exportAt = Date.now() + 30 * 24 * 60 * 60 * 1000;
-  const token = generateToken({ email, name }, exportAt);
+  const token = generateToken({ email, name });
 
   // Store user to DB
   try {
     const User = await userModel.create({
       email,
-      password,
+      password: Bun.password.hashSync(password),
       name,
       role,
       sessions: [
@@ -55,12 +55,15 @@ export const register = async (req: Request, res: Response) => {
       expires: new Date(exportAt),
     });
     User.save();
-    res.status(201).json({ message: "User created", user: User });
+    res
+      .status(201)
+      .json({ message: "Your account has been successfully created!" });
   } catch (error) {
     if ((error as any).code == 11000) {
       res.status(400).json({ error: "User already exists" });
       return;
     }
+
     res.status(500).json({ error: "Internal Server Error", message: error });
   }
 };
@@ -79,5 +82,27 @@ export const login = async (req: Request, res: Response) => {
       .json({ error: validationResult.error.flatten().fieldErrors });
     return;
   }
- 
-}
+  const check = (await userModel.findOne({ email: email })) as any;
+  console.log(check);
+  if (!check || !check.comparePassword(password)) {
+    res.status(401).json({ error: "Invalid email or password" });
+    return;
+  }
+  const token = generateToken({
+    email,
+    name: check.name,
+  });
+  const exportAt = Date.now() + 30 * 24 * 60 * 60 * 1000;
+
+  res.cookie("token", token, {
+    httpOnly: true,
+    expires: new Date(exportAt),
+  });
+  res.json({ message: "Login has be successfull " });
+};
+
+export const session = async (req: Request, res: Response) => {
+  const token = req.cookies.token;
+  const decode = jwt.decode(token);
+  res.status(200).json({ session: decode });
+};

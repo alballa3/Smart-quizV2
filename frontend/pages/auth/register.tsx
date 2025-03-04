@@ -7,12 +7,13 @@ import { motion } from "framer-motion"
 import Link from "next/link"
 import { Eye, EyeOff, ChevronRight, Check, BookOpen, BrainCircuit, Trophy } from "lucide-react"
 import { z } from "zod"
-
+import axois from "axios";
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Checkbox } from "@/components/ui/checkbox"
 import { Progress } from "@/components/ui/progress"
+import axios from "axios"
 
 // Zod schemas
 const emailSchema = z.string().email("Invalid email address")
@@ -106,7 +107,7 @@ export default function SmartQuizRegistration() {
         setFormStep(1)
       } else {
         // Here you would typically send the data to your backend
-        console.log("Form submitted:", formState)
+        const response=axios.get()
         // Redirect or show success message
       }
     }

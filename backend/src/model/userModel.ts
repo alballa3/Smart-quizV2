@@ -1,4 +1,3 @@
-import { hash } from "bun";
 import mongoose, { Schema } from "mongoose";
 const session = new Schema({
   token: {
@@ -45,14 +44,12 @@ const userSchama = new Schema(
   { timestamps: true }
 );
 
-userSchama.pre("save", function (next) {
-  if (!this.isModified("password")) {
-    return next();
-  }
-  this.password = hash(this.password).toString();
-  next();
-});
+
+userSchama.methods.comparePassword = function (
+  candidatePassword: string
+): Boolean {
+  return Bun.password.verifySync(candidatePassword, this.password);
+};
 
 const userModel = mongoose.model("User", userSchama);
-
 export default userModel;
