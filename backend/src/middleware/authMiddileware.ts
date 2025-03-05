@@ -6,9 +6,8 @@ export async function guestMiddleware(
   next: NextFunction
 ) {
   const token = req.cookies.token;
-  const verfy = jwt.verify(token, process.env.JWT_SECRET as string);
-  if (token && verfy) {
-    res.json({
+  if (token) {
+    res.status(404).json({
       message:
         "You do not have permission to access this area. This section is for guests only. Please log out to continue.",
     });
@@ -22,13 +21,21 @@ export async function authMiddleware(
   next: NextFunction
 ) {
   const token = req.cookies.token;
-  const verfy = jwt.verify(token, process.env.JWT_SECRET as string);
-  if (!token && !verfy) {
-    res.json({
+  if (!token) {
+    res.status(404).json({
       message:
         "You must be logged in to access this page. Please sign in to continue.",
     });
     return;
   }
+  const verfy = jwt.verify(token, process.env.JWT_SECRET as string);
+  if (!verfy) {
+    res.status(404).json({
+      message:
+        "You must be logged in to access this page. Please sign in to continue.",
+    });
+    return;
+  }
+
   next();
 }

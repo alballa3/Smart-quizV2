@@ -1,146 +1,189 @@
-"use client"
+"use client";
 
-import type React from "react"
+import type React from "react";
 
-import { useState, useReducer } from "react"
-import { motion } from "framer-motion"
-import Link from "next/link"
-import { Eye, EyeOff, ChevronRight, Check, BookOpen, BrainCircuit, Trophy } from "lucide-react"
-import { z } from "zod"
-import axois from "axios";
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-import { Checkbox } from "@/components/ui/checkbox"
-import { Progress } from "@/components/ui/progress"
-import axios from "axios"
-
+import { useState, useReducer } from "react";
+import { motion } from "framer-motion";
+import Link from "next/link";
+import {
+  Eye,
+  EyeOff,
+  ChevronRight,
+  Check,
+  BookOpen,
+  BrainCircuit,
+  Trophy,
+} from "lucide-react";
+import { z } from "zod";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Progress } from "@/components/ui/progress";
+import { ToastContainer, toast } from "react-toastify";
 // Zod schemas
-const emailSchema = z.string().email("Invalid email address")
-const passwordSchema = z.string().min(8, "Password must be at least 8 characters")
-const nameSchema = z.string().min(2, "Name must be at least 2 characters")
-const usernameSchema = z.string().min(3, "Username must be at least 3 characters")
-const roleSchema = z.enum(["teacher", "administrator", "other"])
+const emailSchema = z.string().email("Invalid email address");
+const passwordSchema = z
+  .string()
+  .min(8, "Password must be at least 8 characters");
+const nameSchema = z.string().min(2, "Name must be at least 2 characters");
+const usernameSchema = z
+  .string()
+  .min(3, "Username must be at least 3 characters");
+const roleSchema = z.enum(["teacher", "administrator", "other"]);
 
 // Form state type
 type FormState = {
-  email: string
-  password: string
-  confirmPassword: string
-  name: string
-  username: string
-  role: string
-  agreeToTerms: boolean
-}
+  email: string;
+  password: string;
+  confirmPassword: string;
+  name: string;
+  username: string;
+  role: string;
+  agreeToTerms: boolean;
+};
 
 // Form action type
 type FormAction =
   | { type: "SET_FIELD"; field: keyof FormState; value: string | boolean }
   | { type: "SET_ERRORS"; errors: Partial<Record<keyof FormState, string>> }
-  | { type: "CLEAR_ERRORS" }
+  | { type: "CLEAR_ERRORS" };
 
 // Initial form state
 const initialFormState: FormState = {
-  email: "",
-  password: "",
-  confirmPassword: "",
-  name: "",
-  username: "",
+  email: "mohafnsn@gmail.com",
+  password: "Moh032t732b",
+  confirmPassword: "Moh032t732b",
+  name: "Mohammedpro",
+  username: "ZZZZz",
   role: "",
-  agreeToTerms: false,
-}
+  agreeToTerms: true,
+};
 
 // Form reducer
 function formReducer(state: FormState, action: FormAction): FormState {
   switch (action.type) {
     case "SET_FIELD":
-      return { ...state, [action.field]: action.value }
+      return { ...state, [action.field]: action.value };
     default:
-      return state
+      return state;
   }
 }
 
 export default function SmartQuizRegistration() {
-  const [formState, dispatch] = useReducer(formReducer, initialFormState)
-  const [errors, setErrors] = useState<Partial<Record<keyof FormState, string>>>({})
-  const [formStep, setFormStep] = useState(0)
-  const [showPassword, setShowPassword] = useState(false)
-  const [showConfirmPassword, setShowConfirmPassword] = useState(false)
+  const [formState, dispatch] = useReducer(formReducer, initialFormState);
+  const [errors, setErrors] = useState<
+    Partial<Record<keyof FormState, string>>
+  >({});
+  const [formStep, setFormStep] = useState(0);
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
   const setFormField = (field: keyof FormState, value: string | boolean) => {
-    dispatch({ type: "SET_FIELD", field, value })
-  }
+    dispatch({ type: "SET_FIELD", field, value });
+  };
 
   const validateForm = async () => {
     try {
       if (formStep === 0) {
-        await emailSchema.parseAsync(formState.email)
-        await passwordSchema.parseAsync(formState.password)
+        await emailSchema.parseAsync(formState.email);
+        await passwordSchema.parseAsync(formState.password);
         if (formState.password !== formState.confirmPassword) {
-          throw new Error("Passwords do not match")
+          throw new Error("Passwords do not match");
         }
         if (!formState.agreeToTerms) {
-          throw new Error("You must agree to the terms and conditions")
+          throw new Error("You must agree to the terms and conditions");
         }
       } else {
-        await nameSchema.parseAsync(formState.name)
-        await usernameSchema.parseAsync(formState.username)
-        await roleSchema.parseAsync(formState.role)
+        await nameSchema.parseAsync(formState.name);
+        await usernameSchema.parseAsync(formState.username);
+        await roleSchema.parseAsync(formState.role);
       }
-      setErrors({})
-      return true
+      setErrors({});
+      return true;
     } catch (error) {
       if (error instanceof z.ZodError) {
-        setErrors(error.flatten().fieldErrors as Partial<Record<keyof FormState, string>>)
+        setErrors(
+          error.flatten().fieldErrors as Partial<
+            Record<keyof FormState, string>
+          >
+        );
       } else if (error instanceof Error) {
-        setErrors({ [formStep === 0 ? "confirmPassword" : "role"]: error.message })
+        setErrors({
+          [formStep === 0 ? "confirmPassword" : "role"]: error.message,
+        });
       }
-      return false
+      return false;
     }
-  }
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
-    const isValid = await validateForm()
+    e.preventDefault();
+    const isValid = await validateForm();
     if (isValid) {
       if (formStep === 0) {
-        setFormStep(1)
+        setFormStep(1);
       } else {
         // Here you would typically send the data to your backend
-        const response=axios.get()
-        // Redirect or show success message
+        try {
+          // const response = await axiosInstance.post("/api/users/register", formState);
+          const repsonse = await fetch(
+            `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/users/register`,
+            {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json",
+              },
+              credentials: "include",
+              body: JSON.stringify(formState),
+            }
+          );
+          if (!repsonse.ok) {
+            toast.error("Registration failed");
+            console.log("Registration failed");
+            return;
+          }
+          const json = await repsonse.json();
+          console.log(json);
+          // Redirect or show success message
+          console.log("Registration Successful");
+          toast.success("Registration Successful");
+        } catch (error) {
+          toast.error("Registration failed");
+          console.log("The Error Come From " + error);
+        }
       }
     }
-  }
+  };
 
   const prevStep = () => {
-    setFormStep(0)
-  }
+    setFormStep(0);
+  };
 
   const getPasswordStrength = () => {
-    const { password } = formState
-    if (!password) return 0
-    let strength = 0
-    if (password.length >= 8) strength += 25
-    if (/\d/.test(password)) strength += 25
-    if (/[a-z]/.test(password)) strength += 25
-    if (/[A-Z]/.test(password) || /[^A-Za-z0-9]/.test(password)) strength += 25
-    return strength
-  }
+    const { password } = formState;
+    if (!password) return 0;
+    let strength = 0;
+    if (password.length >= 8) strength += 25;
+    if (/\d/.test(password)) strength += 25;
+    if (/[a-z]/.test(password)) strength += 25;
+    if (/[A-Z]/.test(password) || /[^A-Za-z0-9]/.test(password)) strength += 25;
+    return strength;
+  };
 
   const getStrengthColor = () => {
-    const strength = getPasswordStrength()
-    if (strength < 50) return "bg-red-500"
-    if (strength < 75) return "bg-yellow-500"
-    return "bg-green-500"
-  }
+    const strength = getPasswordStrength();
+    if (strength < 50) return "bg-red-500";
+    if (strength < 75) return "bg-yellow-500";
+    return "bg-green-500";
+  };
 
   return (
     <div className="flex min-h-screen flex-col bg-gradient-to-b from-zinc-900 to-zinc-950 md:flex-row">
       {/* Decorative Side Panel */}
       <div className="relative hidden w-full overflow-hidden md:flex md:w-1/2">
         <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-indigo-900 via-blue-900 to-zinc-900"></div>
-
+        <ToastContainer />
         {/* Animated elements */}
         <motion.div
           animate={{
@@ -187,7 +230,8 @@ export default function SmartQuizRegistration() {
               </span>
             </h1>
             <p className="text-lg text-indigo-200">
-              Empower your teaching with AI-driven quizzes and personalized learning paths.
+              Empower your teaching with AI-driven quizzes and personalized
+              learning paths.
             </p>
 
             <div className="space-y-4 pt-6">
@@ -195,19 +239,25 @@ export default function SmartQuizRegistration() {
                 <div className="flex h-10 w-10 items-center justify-center rounded-full bg-indigo-900/60 text-indigo-300">
                   <BrainCircuit size={20} />
                 </div>
-                <p className="text-left text-sm text-zinc-300">AI-powered quiz generation</p>
+                <p className="text-left text-sm text-zinc-300">
+                  AI-powered quiz generation
+                </p>
               </div>
               <div className="flex items-center space-x-3">
                 <div className="flex h-10 w-10 items-center justify-center rounded-full bg-indigo-900/60 text-indigo-300">
                   <Trophy size={20} />
                 </div>
-                <p className="text-left text-sm text-zinc-300">Adaptive learning paths for students</p>
+                <p className="text-left text-sm text-zinc-300">
+                  Adaptive learning paths for students
+                </p>
               </div>
               <div className="flex items-center space-x-3">
                 <div className="flex h-10 w-10 items-center justify-center rounded-full bg-indigo-900/60 text-indigo-300">
                   <Check size={20} />
                 </div>
-                <p className="text-left text-sm text-zinc-300">Real-time performance analytics</p>
+                <p className="text-left text-sm text-zinc-300">
+                  Real-time performance analytics
+                </p>
               </div>
             </div>
           </motion.div>
@@ -227,7 +277,9 @@ export default function SmartQuizRegistration() {
               {formStep === 0 ? "Create your account" : "Complete your profile"}
             </h2>
             <p className="text-zinc-400">
-              {formStep === 0 ? "Start your journey with Smart Quiz today." : "Tell us a bit more about yourself."}
+              {formStep === 0
+                ? "Start your journey with Smart Quiz today."
+                : "Tell us a bit more about yourself."}
             </p>
           </div>
 
@@ -254,7 +306,9 @@ export default function SmartQuizRegistration() {
                   >
                     Email address
                   </Label>
-                  {errors.email && <p className="mt-1 text-xs text-red-400">{errors.email}</p>}
+                  {errors.email && (
+                    <p className="mt-1 text-xs text-red-400">{errors.email}</p>
+                  )}
                 </div>
 
                 <div className="group relative z-0 mb-6 w-full">
@@ -281,11 +335,18 @@ export default function SmartQuizRegistration() {
                       Password
                     </Label>
                   </div>
-                  {errors.password && <p className="mt-1 text-xs text-red-400">{errors.password}</p>}
+                  {errors.password && (
+                    <p className="mt-1 text-xs text-red-400">
+                      {errors.password}
+                    </p>
+                  )}
 
                   {formState.password && (
                     <div className="mt-2 space-y-1">
-                      <Progress value={getPasswordStrength()} className="h-1 w-full bg-zinc-800">
+                      <Progress
+                        value={getPasswordStrength()}
+                        className="h-1 w-full bg-zinc-800"
+                      >
                         <div
                           className={`h-full ${getStrengthColor()}`}
                           style={{ width: `${getPasswordStrength()}%` }}
@@ -293,7 +354,9 @@ export default function SmartQuizRegistration() {
                       </Progress>
                       <p className="text-xs text-zinc-500">
                         {getPasswordStrength() < 50 && "Weak password"}
-                        {getPasswordStrength() >= 50 && getPasswordStrength() < 75 && "Medium strength"}
+                        {getPasswordStrength() >= 50 &&
+                          getPasswordStrength() < 75 &&
+                          "Medium strength"}
                         {getPasswordStrength() >= 75 && "Strong password"}
                       </p>
                     </div>
@@ -306,16 +369,24 @@ export default function SmartQuizRegistration() {
                       id="confirmPassword"
                       type={showConfirmPassword ? "text" : "password"}
                       value={formState.confirmPassword}
-                      onChange={(e) => setFormField("confirmPassword", e.target.value)}
+                      onChange={(e) =>
+                        setFormField("confirmPassword", e.target.value)
+                      }
                       placeholder=" "
                       className="peer block w-full appearance-none border-0 border-b-2 border-zinc-700 bg-transparent px-0 py-2.5 text-white focus:border-indigo-500 focus:outline-none focus:ring-0"
                     />
                     <button
                       type="button"
-                      onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                      onClick={() =>
+                        setShowConfirmPassword(!showConfirmPassword)
+                      }
                       className="absolute right-0 top-3 text-zinc-400 hover:text-zinc-300"
                     >
-                      {showConfirmPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                      {showConfirmPassword ? (
+                        <EyeOff size={18} />
+                      ) : (
+                        <Eye size={18} />
+                      )}
                     </button>
                     <Label
                       htmlFor="confirmPassword"
@@ -324,28 +395,44 @@ export default function SmartQuizRegistration() {
                       Confirm Password
                     </Label>
                   </div>
-                  {errors.confirmPassword && <p className="mt-1 text-xs text-red-400">{errors.confirmPassword}</p>}
+                  {errors.confirmPassword && (
+                    <p className="mt-1 text-xs text-red-400">
+                      {errors.confirmPassword}
+                    </p>
+                  )}
                 </div>
 
                 <div className="flex items-center space-x-2">
                   <Checkbox
                     id="terms"
                     checked={formState.agreeToTerms}
-                    onCheckedChange={(checked) => setFormField("agreeToTerms", checked === true)}
+                    onCheckedChange={(checked) =>
+                      setFormField("agreeToTerms", checked === true)
+                    }
                     className="border-zinc-700 data-[state=checked]:bg-indigo-600 data-[state=checked]:text-white"
                   />
                   <Label htmlFor="terms" className="text-sm text-zinc-400">
                     I agree to the{" "}
-                    <Link href="#" className="text-indigo-400 hover:text-indigo-300 hover:underline">
+                    <Link
+                      href="#"
+                      className="text-indigo-400 hover:text-indigo-300 hover:underline"
+                    >
                       Terms of Service
                     </Link>{" "}
                     and{" "}
-                    <Link href="#" className="text-indigo-400 hover:text-indigo-300 hover:underline">
+                    <Link
+                      href="#"
+                      className="text-indigo-400 hover:text-indigo-300 hover:underline"
+                    >
                       Privacy Policy
                     </Link>
                   </Label>
                 </div>
-                {errors.agreeToTerms && <p className="mt-1 text-xs text-red-400">{errors.agreeToTerms}</p>}
+                {errors.agreeToTerms && (
+                  <p className="mt-1 text-xs text-red-400">
+                    {errors.agreeToTerms}
+                  </p>
+                )}
 
                 <motion.button
                   whileHover={{ scale: 1.02 }}
@@ -379,7 +466,9 @@ export default function SmartQuizRegistration() {
                   >
                     Full Name
                   </Label>
-                  {errors.name && <p className="mt-1 text-xs text-red-400">{errors.name}</p>}
+                  {errors.name && (
+                    <p className="mt-1 text-xs text-red-400">{errors.name}</p>
+                  )}
                 </div>
 
                 <div className="group relative z-0 mb-6 w-full">
@@ -397,7 +486,11 @@ export default function SmartQuizRegistration() {
                   >
                     Username
                   </Label>
-                  {errors.username && <p className="mt-1 text-xs text-red-400">{errors.username}</p>}
+                  {errors.username && (
+                    <p className="mt-1 text-xs text-red-400">
+                      {errors.username}
+                    </p>
+                  )}
                 </div>
 
                 <div className="space-y-2">
@@ -415,7 +508,9 @@ export default function SmartQuizRegistration() {
                     <option value="administrator">Administrator</option>
                     <option value="other">Other</option>
                   </select>
-                  {errors.role && <p className="mt-1 text-xs text-red-400">{errors.role}</p>}
+                  {errors.role && (
+                    <p className="mt-1 text-xs text-red-400">{errors.role}</p>
+                  )}
                 </div>
 
                 <div className="flex justify-between pt-4">
@@ -441,13 +536,15 @@ export default function SmartQuizRegistration() {
 
           <div className="text-center text-sm text-zinc-500">
             Already have an account?{" "}
-            <Link href="/login" className="text-indigo-400 hover:text-indigo-300 hover:underline">
+            <Link
+              href="/login"
+              className="text-indigo-400 hover:text-indigo-300 hover:underline"
+            >
               Sign in
             </Link>
           </div>
         </motion.div>
       </div>
     </div>
-  )
+  );
 }
-
