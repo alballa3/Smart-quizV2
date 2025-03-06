@@ -1,74 +1,98 @@
-"use client"
+"use client";
 
-import type React from "react"
+import type React from "react";
 
-import { useState } from "react"
-import { motion } from "framer-motion"
-import Link from "next/link"
-import { Eye, EyeOff, LogIn, BookOpen, BrainCircuit, Trophy } from "lucide-react"
-import { z } from "zod"
+import { useState } from "react";
+import { motion } from "framer-motion";
+import Link from "next/link";
+import {
+  Eye,
+  EyeOff,
+  LogIn,
+  BookOpen,
+  BrainCircuit,
+  Trophy,
+} from "lucide-react";
+import { z } from "zod";
 
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-import { Checkbox } from "@/components/ui/checkbox"
-import { axiosInstance } from "@/lib/axios"
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Checkbox } from "@/components/ui/checkbox";
+import { axiosInstance } from "@/lib/axios";
+import { toast, ToastContainer } from "react-toastify";
+import { useRouter } from "next/router";
 
 // Zod schemas for validation
-const emailSchema = z.string().email("Invalid email address")
-const passwordSchema = z.string().min(6, "The minimum  Length for the password is 6")
+const emailSchema = z.string().email("Invalid email address");
+const passwordSchema = z
+  .string()
+  .min(6, "The minimum  Length for the password is 6");
 
 export default function SmartQuizLogin() {
-  const [email, setEmail] = useState("Mohammed@gmail.com")
-  const [password, setPassword] = useState("agjnags12")
-  const [rememberMe, setRememberMe] = useState(false)
-  const [showPassword, setShowPassword] = useState(false)
-  const [errors, setErrors] = useState<{ email?: string; password?: string }>({})
-  const [isLoading, setIsLoading] = useState(false)
-
-  
+  const route = useRouter();
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [rememberMe, setRememberMe] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
+  const [errors, setErrors] = useState<{ email?: string; password?: string }>(
+    {}
+  );
+  const [isLoading, setIsLoading] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
+    e.preventDefault();
 
     // Create a schema for the form
     const loginSchema = z.object({
       email: emailSchema,
       password: passwordSchema,
-    })
+    });
 
     // Use safeParse to validate the form data
-    const result = loginSchema.safeParse({ email, password })
+    const result = loginSchema.safeParse({ email, password });
 
     if (result.success) {
-      setErrors({})
-      setIsLoading(true)
+      setErrors({});
+      setIsLoading(true);
 
-      //  API call
-      try {
-        const response=await axiosInstance.post("api/users/login", { email, password })
-        console.log(response.data)
-      } catch (error) {
-        console.error("Error logging in:", error)
+      const response = await fetch(
+        `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/users/login`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          credentials: "include",
+          body: JSON.stringify({ email, password, rememberMe }),
+        }
+      );
+      const json = await response.json();
+      setIsLoading(false);
+      if (!response.ok) {
+        toast.error(json.error);
+        console.log("Login failed", json);
+        return;
       }
-
-      setIsLoading(false)
+      console.log("Login Successful", json);
+      route.push("/");
+      toast.success("Login Successful");
     } else {
       // Extract and set errors from the validation result
-      const formattedErrors = result.error.format()
+      const formattedErrors = result.error.format();
       setErrors({
         email: formattedErrors.email?._errors[0],
         password: formattedErrors.password?._errors[0],
-      })
+      });
     }
-  }
+  };
 
   return (
     <div className="flex min-h-screen flex-col bg-gradient-to-b from-zinc-900 to-zinc-950 md:flex-row">
       {/* Decorative Side Panel */}
       <div className="relative hidden w-full overflow-hidden md:flex md:w-1/2">
         <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-indigo-900 via-blue-900 to-zinc-900"></div>
-
+        <ToastContainer />
         {/* Animated elements */}
         <motion.div
           animate={{
@@ -115,7 +139,8 @@ export default function SmartQuizLogin() {
               </span>
             </h1>
             <p className="text-lg text-indigo-200">
-              Empower your teaching with AI-driven quizzes and personalized learning paths.
+              Empower your teaching with AI-driven quizzes and personalized
+              learning paths.
             </p>
 
             <div className="space-y-4 pt-6">
@@ -123,13 +148,17 @@ export default function SmartQuizLogin() {
                 <div className="flex h-10 w-10 items-center justify-center rounded-full bg-indigo-900/60 text-indigo-300">
                   <BrainCircuit size={20} />
                 </div>
-                <p className="text-left text-sm text-zinc-300">AI-powered quiz generation</p>
+                <p className="text-left text-sm text-zinc-300">
+                  AI-powered quiz generation
+                </p>
               </div>
               <div className="flex items-center space-x-3">
                 <div className="flex h-10 w-10 items-center justify-center rounded-full bg-indigo-900/60 text-indigo-300">
                   <Trophy size={20} />
                 </div>
-                <p className="text-left text-sm text-zinc-300">Adaptive learning paths for students</p>
+                <p className="text-left text-sm text-zinc-300">
+                  Adaptive learning paths for students
+                </p>
               </div>
             </div>
           </motion.div>
@@ -171,7 +200,9 @@ export default function SmartQuizLogin() {
                 >
                   Email address
                 </Label>
-                {errors.email && <p className="mt-1 text-xs text-red-400">{errors.email}</p>}
+                {errors.email && (
+                  <p className="mt-1 text-xs text-red-400">{errors.email}</p>
+                )}
               </div>
 
               <div className="group relative z-0 mb-6 w-full">
@@ -198,10 +229,10 @@ export default function SmartQuizLogin() {
                     Password
                   </Label>
                 </div>
-                {errors.password && <p className="mt-1 text-xs text-red-400">{errors.password}</p>}
+                {errors.password && (
+                  <p className="mt-1 text-xs text-red-400">{errors.password}</p>
+                )}
               </div>
-
-           
 
               <motion.button
                 whileHover={{ scale: 1.02 }}
@@ -222,16 +253,17 @@ export default function SmartQuizLogin() {
             </motion.div>
           </form>
 
-
           <div className="text-center text-sm text-zinc-500">
             Don't have an account?{" "}
-            <Link href="/register" className="text-indigo-400 hover:text-indigo-300 hover:underline">
+            <Link
+              href="/auth/register"
+              className="text-indigo-400 hover:text-indigo-300 hover:underline"
+            >
               Sign up
             </Link>
           </div>
         </motion.div>
       </div>
     </div>
-  )
+  );
 }
-

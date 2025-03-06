@@ -1,7 +1,13 @@
 "use client";
 
 import type React from "react";
-
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { useState, useReducer } from "react";
 import { motion } from "framer-motion";
 import Link from "next/link";
@@ -13,6 +19,7 @@ import {
   BookOpen,
   BrainCircuit,
   Trophy,
+  UserIcon,
 } from "lucide-react";
 import { z } from "zod";
 import { Button } from "@/components/ui/button";
@@ -21,6 +28,7 @@ import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Progress } from "@/components/ui/progress";
 import { ToastContainer, toast } from "react-toastify";
+import { useRouter } from "next/router";
 // Zod schemas
 const emailSchema = z.string().email("Invalid email address");
 const passwordSchema = z
@@ -51,11 +59,11 @@ type FormAction =
 
 // Initial form state
 const initialFormState: FormState = {
-  email: "mohafnsn@gmail.com",
-  password: "Moh032t732b",
-  confirmPassword: "Moh032t732b",
-  name: "Mohammedpro",
-  username: "ZZZZz",
+  email: "",
+  password: "",
+  confirmPassword: "",
+  name: "",
+  username: "",
   role: "",
   agreeToTerms: true,
 };
@@ -71,6 +79,7 @@ function formReducer(state: FormState, action: FormAction): FormState {
 }
 
 export default function SmartQuizRegistration() {
+  const route = useRouter();
   const [formState, dispatch] = useReducer(formReducer, initialFormState);
   const [errors, setErrors] = useState<
     Partial<Record<keyof FormState, string>>
@@ -138,14 +147,15 @@ export default function SmartQuizRegistration() {
               body: JSON.stringify(formState),
             }
           );
+          const json = await repsonse.json();
           if (!repsonse.ok) {
-            toast.error("Registration failed");
-            console.log("Registration failed");
+            toast.error(json.error);
+            console.log("Registration failed", json);
             return;
           }
-          const json = await repsonse.json();
           console.log(json);
           // Redirect or show success message
+          route.push("/");
           console.log("Registration Successful");
           toast.success("Registration Successful");
         } catch (error) {
@@ -402,32 +412,6 @@ export default function SmartQuizRegistration() {
                   )}
                 </div>
 
-                <div className="flex items-center space-x-2">
-                  <Checkbox
-                    id="terms"
-                    checked={formState.agreeToTerms}
-                    onCheckedChange={(checked) =>
-                      setFormField("agreeToTerms", checked === true)
-                    }
-                    className="border-zinc-700 data-[state=checked]:bg-indigo-600 data-[state=checked]:text-white"
-                  />
-                  <Label htmlFor="terms" className="text-sm text-zinc-400">
-                    I agree to the{" "}
-                    <Link
-                      href="#"
-                      className="text-indigo-400 hover:text-indigo-300 hover:underline"
-                    >
-                      Terms of Service
-                    </Link>{" "}
-                    and{" "}
-                    <Link
-                      href="#"
-                      className="text-indigo-400 hover:text-indigo-300 hover:underline"
-                    >
-                      Privacy Policy
-                    </Link>
-                  </Label>
-                </div>
                 {errors.agreeToTerms && (
                   <p className="mt-1 text-xs text-red-400">
                     {errors.agreeToTerms}
@@ -497,17 +481,22 @@ export default function SmartQuizRegistration() {
                   <Label htmlFor="role" className="text-sm text-zinc-400">
                     What best describes your role?
                   </Label>
-                  <select
-                    id="role"
-                    value={formState.role}
-                    onChange={(e) => setFormField("role", e.target.value)}
-                    className="w-full rounded-md border-zinc-700 bg-zinc-800 text-white focus:border-indigo-500 focus:ring-indigo-500"
+                  <Select
+                    onValueChange={(value) => setFormField("role", value)}
                   >
-                    <option value="">Select your role</option>
-                    <option value="teacher">Teacher</option>
-                    <option value="administrator">Administrator</option>
-                    <option value="other">Other</option>
-                  </select>
+                    <SelectTrigger className="w-full border border-zinc-700 bg-zinc-800 text-white shadow-sm hover:bg-zinc-700">
+                      <UserIcon className="w-5 h-5 text-gray-300 mr-2" />
+                      <SelectValue placeholder="Select your role" />
+                    </SelectTrigger>
+                    <SelectContent className="bg-zinc-800 border border-zinc-700 shadow-md text-white">
+                      <SelectItem value="teacher">👨‍🏫 Teacher</SelectItem>
+                      <SelectItem value="administrator">
+                        📋 Administrator
+                      </SelectItem>
+                      <SelectItem value="other">❓ Other</SelectItem>
+                    </SelectContent>
+                  </Select>
+
                   {errors.role && (
                     <p className="mt-1 text-xs text-red-400">{errors.role}</p>
                   )}
@@ -537,7 +526,7 @@ export default function SmartQuizRegistration() {
           <div className="text-center text-sm text-zinc-500">
             Already have an account?{" "}
             <Link
-              href="/login"
+              href="/auth/login"
               className="text-indigo-400 hover:text-indigo-300 hover:underline"
             >
               Sign in
