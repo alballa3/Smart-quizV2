@@ -1,16 +1,18 @@
 import "@/styles/globals.css";
+import { AnimatePresence } from "framer-motion";
 import type { AppProps } from "next/app";
-import { Poppins } from 'next/font/google'
+import { Poppins } from "next/font/google";
 
 const poppins = Poppins({
-  subsets: ['latin'],
-  weight: ['300', '400', '500', '600', '700']
-})
+  subsets: ["latin"],
+  weight: ["300", "400", "500", "600", "700"],
+});
 export default function App({ Component, pageProps }: AppProps) {
-   return (
+  return (
+    <AnimatePresence>
       <main className={poppins.className}>
-         <Component {...pageProps} />
+        <Component {...pageProps} />
       </main>
-   );
-   ;
+    </AnimatePresence>
+  );
 }

@@ -93,6 +93,20 @@ export const login = async (req: Request, res: Response) => {
     name: check.name,
   });
   const exportAt = Date.now() + 30 * 24 * 60 * 60 * 1000;
+  const updateToken = await userModel.findOneAndUpdate(
+    {
+      email: email,
+    },
+    {
+      $push: {
+        sessions: {
+          token: token,
+          exportAt: exportAt,
+          userAgent: req.headers["user-agent"],
+        },
+      },
+    }
+  );
 
   res.cookie("token", token, {
     httpOnly: true,
@@ -105,4 +119,29 @@ export const session = async (req: Request, res: Response) => {
   const token = req.cookies.token;
   const decode = jwt.decode(token);
   res.status(200).json({ session: decode });
+};
+export const logout = async (req: Request, res: Response) => {
+  const token = req.cookies.token;
+  const decodeToken = jwt.decode(token) as Record<string, any>;
+  const user = await userModel.findOneAndUpdate(
+    {
+      email: decodeToken?.email,
+    },
+    {
+      $pull: {
+        sessions: {
+          token,
+        },
+      },
+    },
+    {
+      new: true,
+    }
+  );
+  res.clearCookie("token", {
+    httpOnly: true,
+    secure: true,
+  });
+
+  res.json({ message: "You have been logged out successfully." });
 };
