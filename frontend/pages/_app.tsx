@@ -10,7 +10,7 @@ const poppins = Poppins({
 export default function App({ Component, pageProps }: AppProps) {
   return (
     <AnimatePresence>
-      <main className={poppins.className}>
+      <main className={`${poppins.className} mx-auto w-full` }>
         <Component {...pageProps} />
       </main>
     </AnimatePresence>

@@ -23,6 +23,8 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
+import { ISession, useSession } from "@/lib/auth";
+import { toast, ToastContainer } from "react-toastify";
 
 // Animation variants in a separate object for cleaner code
 const animations = {
@@ -98,16 +100,37 @@ const NAV_ITEMS = [
 
 export default function Header() {
   const [scrolled, setScrolled] = useState(false);
-  const [isLoggedIn, setIsLoggedIn] = useState(true);
-
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [user, setUser] = useState<ISession | null>(null);
   useEffect(() => {
+    const handleUser = async () => {
+      const session = await useSession();
+      console.log(session.session);
+      if (session.isAuth) {
+        setUser(session.session);
+        setIsLoggedIn(session.isAuth);
+      }
+    };
+    handleUser();
     const handleScroll = () => {
       setScrolled(window.scrollY > 20);
     };
     window.addEventListener("scroll", handleScroll);
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
-
+  const handleLogout = async () => {
+    const response = await fetch(
+      `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/users/logout`,
+      {
+        method: "DELETE",
+        credentials: "include",
+      }
+    );
+    const json = await response.json();
+    console.log(json);
+    toast.success(json.message);
+    window.location.reload();
+  };
   // Extracted component for logo for cleaner JSX
   const Logo = () => (
     <motion.div
@@ -117,6 +140,7 @@ export default function Header() {
       variants={animations.logo}
       className="flex items-center gap-2"
     >
+      <ToastContainer />
       <Link href="/" className="flex items-center space-x-2 group">
         <span className="relative flex h-9 w-9 items-center justify-center">
           <span className="absolute h-full w-full rounded-full bg-gradient-to-br from-blue-400 to-blue-600 opacity-70 blur-sm group-hover:opacity-100 transition-all duration-300"></span>
@@ -143,7 +167,7 @@ export default function Header() {
             <User className="h-4 w-4 text-white relative z-10" />
           </div>
           <span className="text-sm font-medium hidden sm:inline-block">
-            John Doe
+            {user?.name}
           </span>
           <ChevronDown className="h-4 w-4 text-muted-foreground group-hover:rotate-180 transition-transform duration-300" />
         </Button>
@@ -157,10 +181,8 @@ export default function Header() {
             <User className="h-5 w-5 text-white" />
           </div>
           <div className="flex flex-col">
-            <p className="text-sm font-medium">John Doe</p>
-            <p className="text-xs text-muted-foreground">
-              john.doe@example.com
-            </p>
+            <p className="text-sm font-medium">{user?.name}</p>
+            <p className="text-xs text-muted-foreground">{user?.email}</p>
           </div>
         </div>
         <DropdownMenuItem className="flex items-center gap-2 cursor-pointer hover:bg-blue-900/20 focus:bg-blue-900/20 rounded-lg p-2 my-1 transition-colors duration-200">
@@ -174,7 +196,7 @@ export default function Header() {
         <DropdownMenuSeparator className="bg-blue-900/20 my-1" />
         <DropdownMenuItem
           className="flex items-center gap-2 cursor-pointer hover:bg-blue-900/20 focus:bg-blue-900/20 rounded-lg p-2 my-1 transition-colors duration-200"
-          onClick={() => setIsLoggedIn(false)}
+          onClick={handleLogout}
         >
           <LogOut className="h-4 w-4 text-blue-400" />
           <span>Log out</span>
@@ -191,28 +213,29 @@ export default function Header() {
       whileTap="tap"
       className="hidden sm:block"
     >
-      <Button
-        variant="outline"
-        className="border-blue-700/30 hover:bg-blue-900/20 hover:text-blue-400 relative overflow-hidden group"
-        onClick={() => setIsLoggedIn(true)}
-      >
-        <span className="absolute inset-0 w-0 bg-blue-500/10 transition-all duration-300 ease-out group-hover:w-full"></span>
-        <LogIn className="h-4 w-4 mr-2 group-hover:translate-x-1 transition-transform duration-300" />
-        <span className="relative z-10">Log In</span>
-      </Button>
+      <Link href="/auth/login">
+        <Button
+          variant="outline"
+          className="border-blue-700/30 hover:bg-blue-900/20 hover:text-blue-400 relative overflow-hidden group"
+          onClick={() => setIsLoggedIn(true)}
+        >
+          <span className="absolute inset-0 w-0 bg-blue-500/10 transition-all duration-300 ease-out group-hover:w-full"></span>
+          <LogIn className="h-4 w-4 mr-2 group-hover:translate-x-1 transition-transform duration-300" />
+          <span className="relative z-10">Log In</span>
+        </Button>
+      </Link>
     </motion.div>
   );
 
   const GetStartedButton = () => (
     <motion.div variants={animations.button} whileHover="hover" whileTap="tap">
-      <Button
-        className="bg-gradient-to-r from-blue-600 to-blue-500 hover:opacity-90 transition-all duration-300 shadow-lg hover:shadow-blue-500/20 relative overflow-hidden group"
-        onClick={() => setIsLoggedIn(true)}
-      >
-        <span className="absolute inset-0 w-0 bg-white/20 transition-all duration-500 ease-out group-hover:w-full"></span>
-        <Rocket className="h-4 w-4 mr-2 group-hover:translate-x-1 transition-transform duration-300" />
-        <span className="relative z-10">Get Started</span>
-      </Button>
+      <Link href="/auth/register">
+        <Button className="bg-gradient-to-r from-blue-600 to-blue-500 hover:opacity-90 transition-all duration-300 shadow-lg hover:shadow-blue-500/20 relative overflow-hidden group">
+          <span className="absolute inset-0 w-0 bg-white/20 transition-all duration-500 ease-out group-hover:w-full"></span>
+          <Rocket className="h-4 w-4 mr-2 group-hover:translate-x-1 transition-transform duration-300" />
+          <span className="relative z-10">Get Started</span>
+        </Button>
+      </Link>
     </motion.div>
   );
 
@@ -338,27 +361,27 @@ export default function Header() {
                 <div className="mt-auto pt-8 border-t border-blue-900/20 flex flex-col gap-3">
                   {!isLoggedIn ? (
                     <>
-                      <Button
-                        variant="outline"
-                        className="border-blue-700/30 hover:bg-blue-900/20 w-full justify-start"
-                        onClick={() => setIsLoggedIn(true)}
-                      >
-                        <LogIn className="h-4 w-4 mr-2" />
-                        Log In
-                      </Button>
-                      <Button
-                        className="bg-gradient-to-r from-blue-600 to-blue-500 w-full justify-start"
-                        onClick={() => setIsLoggedIn(true)}
-                      >
-                        <Rocket className="h-4 w-4 mr-2" />
-                        Get Started
-                      </Button>
+                      <Link href="/auth/login">
+                        <Button
+                          variant="outline"
+                          className="border-blue-700/30 hover:bg-blue-900/20 w-full justify-start"
+                        >
+                          <LogIn className="h-4 w-4 mr-2" />
+                          Log In
+                        </Button>
+                      </Link>
+                      <Link href="/auth/register">
+                        <Button className="bg-gradient-to-r from-blue-600 to-blue-500 w-full justify-start">
+                          <Rocket className="h-4 w-4 mr-2" />
+                          Get Started
+                        </Button>
+                      </Link>
                     </>
                   ) : (
                     <Button
                       variant="outline"
                       className="border-blue-700/30 hover:bg-blue-900/20 w-full justify-start"
-                      onClick={() => setIsLoggedIn(false)}
+                      onClick={handleLogout}
                     >
                       <LogOut className="h-4 w-4 mr-2" />
                       Log Out

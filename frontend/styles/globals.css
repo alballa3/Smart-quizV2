@@ -1,6 +1,6 @@
-@import "tailwindcss";
-
-@plugin "tailwindcss-animate";
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
 @layer base {
   :root {
     --background: 220 20% 2.5%;
@@ -132,4 +132,6 @@
 .animate-glow {
   animation: glow 3s infinite;
 }
+ 
 
+ 
