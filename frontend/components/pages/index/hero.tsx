@@ -1,28 +1,30 @@
-"use client"
+"use client";
 
-import { useEffect, useState, useRef } from "react"
-import { motion, useInView, useAnimation } from "framer-motion"
-import { Button } from "@/components/ui/button"
-import { ArrowRight, CheckCircle, FileQuestion, Sparkles, Play } from "lucide-react"
-import { Dialog, DialogContent, DialogClose } from "@/components/ui/dialog"
-import { session } from "@/lib/auth"
+import { useEffect, useState, useRef } from "react";
+import { motion, useInView, useAnimation } from "framer-motion";
+import { Button } from "@/components/ui/button";
+import {
+  ArrowRight,
+  CheckCircle,
+  FileQuestion,
+  Sparkles,
+  Play,
+} from "lucide-react";
+import { Dialog, DialogContent, DialogClose } from "@/components/ui/dialog";
 
 export default function Hero() {
-  const [isVisible, setIsVisible] = useState(false)
-  const [showVideo, setShowVideo] = useState(false)
-  const controls = useAnimation()
-  const ref = useRef(null)
-  const isInView = useInView(ref, { once: true })
+  const [isVisible, setIsVisible] = useState(false);
+  const [showVideo, setShowVideo] = useState(false);
+  const controls = useAnimation();
+  const ref = useRef(null);
+  const isInView = useInView(ref, { once: true });
   useEffect(() => {
     if (isInView) {
-      controls.start("visible")
-      setIsVisible(true)
+      controls.start("visible");
+      setIsVisible(true);
     }
-  }, [controls, isInView])
-  const handle=async () => {
-    const get =await session()
-    console.log(get)
-  }
+  }, [controls, isInView]);
+
   const containerVariants = {
     hidden: { opacity: 0 },
     visible: {
@@ -32,7 +34,7 @@ export default function Hero() {
         delayChildren: 0.1,
       },
     },
-  }
+  };
 
   const itemVariants = {
     hidden: { opacity: 0, y: 20 },
@@ -41,10 +43,13 @@ export default function Hero() {
       y: 0,
       transition: { duration: 0.6, ease: [0.22, 1, 0.36, 1] },
     },
-  }
+  };
 
   return (
-    <section ref={ref} className="w-full py-16 sm:py-20 md:py-24 lg:py-32 overflow-hidden relative">
+    <section
+      ref={ref}
+      className="w-full py-16 sm:py-20 md:py-24 lg:py-32 overflow-hidden relative"
+    >
       <motion.div
         initial="hidden"
         animate={controls}
@@ -69,15 +74,18 @@ export default function Hero() {
             </h1>
 
             <p className="text-muted-foreground text-base sm:text-lg md:text-xl max-w-[600px] mx-auto lg:mx-0">
-              Create, distribute, and grade quizzes effortlessly. Help your students succeed with our intuitive quiz
-              platform designed specifically for educators.
+              Create, distribute, and grade quizzes effortlessly. Help your
+              students succeed with our intuitive quiz platform designed
+              specifically for educators.
             </p>
 
             <div className="flex flex-wrap justify-center lg:justify-start gap-4">
-              <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
+              <motion.div
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+              >
                 <Button
                   size="lg"
-                  onClick={handle}
                   className="bg-gradient-to-r from-blue-600 to-blue-500 hover:opacity-90 transition-all duration-300 shadow-lg hover:shadow-blue-500/20 rounded-full px-6 sm:px-8 h-12 text-sm sm:text-base"
                 >
                   Create Your First Quiz
@@ -85,7 +93,10 @@ export default function Hero() {
                 </Button>
               </motion.div>
 
-              <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
+              <motion.div
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+              >
                 <Button
                   variant="outline"
                   size="lg"
@@ -99,7 +110,11 @@ export default function Hero() {
             </div>
 
             <div className="flex flex-wrap justify-center lg:justify-start gap-x-6 sm:gap-x-8 gap-y-3 text-xs sm:text-sm text-muted-foreground">
-              {["No credit card required", "Free for educators", "Instant results"].map((item, i) => (
+              {[
+                "No credit card required",
+                "Free for educators",
+                "Instant results",
+              ].map((item, i) => (
                 <div key={i} className="flex items-center">
                   <CheckCircle className="h-4 w-4 mr-2 text-blue-500 flex-shrink-0" />
                   <span>{item}</span>
@@ -108,7 +123,10 @@ export default function Hero() {
             </div>
           </motion.div>
 
-          <motion.div variants={itemVariants} className="flex-1 relative w-full max-w-xl mx-auto lg:mx-0">
+          <motion.div
+            variants={itemVariants}
+            className="flex-1 relative w-full max-w-xl mx-auto lg:mx-0"
+          >
             <div className="relative">
               <div className="absolute -inset-0.5 bg-gradient-to-r from-blue-500 to-blue-600 rounded-2xl blur opacity-20"></div>
               <div className="relative rounded-2xl overflow-hidden border border-blue-900/30 shadow-2xl shadow-blue-500/10">
@@ -119,15 +137,22 @@ export default function Hero() {
                   {/* Quiz Creator Preview */}
                   <div className="absolute inset-0 p-4 sm:p-6 flex flex-col">
                     <div className="flex items-center justify-between mb-4 border-b border-blue-900/20 pb-4">
-                      <div className="text-sm sm:text-lg font-semibold text-blue-400">New Quiz: Mathematics 101</div>
-                      <Button size="sm" className="bg-blue-600 hover:bg-blue-700 text-xs sm:text-sm">
+                      <div className="text-sm sm:text-lg font-semibold text-blue-400">
+                        New Quiz: Mathematics 101
+                      </div>
+                      <Button
+                        size="sm"
+                        className="bg-blue-600 hover:bg-blue-700 text-xs sm:text-sm"
+                      >
                         Save Quiz
                       </Button>
                     </div>
 
                     <div className="flex-1 flex flex-col gap-4 overflow-hidden">
                       <div className="bg-blue-950/40 p-3 sm:p-4 rounded-lg border border-blue-900/30">
-                        <div className="text-xs sm:text-sm text-blue-400 mb-2">Question 1</div>
+                        <div className="text-xs sm:text-sm text-blue-400 mb-2">
+                          Question 1
+                        </div>
                         <div className="text-sm sm:text-base mb-3">
                           What is the value of π (pi) to two decimal places?
                         </div>
@@ -148,8 +173,12 @@ export default function Hero() {
                       </div>
 
                       <div className="bg-blue-950/40 p-3 sm:p-4 rounded-lg border border-blue-900/30">
-                        <div className="text-xs sm:text-sm text-blue-400 mb-2">Question 2</div>
-                        <div className="text-sm sm:text-base mb-3">Solve for x: 2x + 5 = 15</div>
+                        <div className="text-xs sm:text-sm text-blue-400 mb-2">
+                          Question 2
+                        </div>
+                        <div className="text-sm sm:text-base mb-3">
+                          Solve for x: 2x + 5 = 15
+                        </div>
                         <div className="grid grid-cols-2 gap-2">
                           <div className="bg-blue-950/30 p-2 rounded border border-blue-900/20 text-xs sm:text-sm">
                             A) x = 5
@@ -179,16 +208,24 @@ export default function Hero() {
                 {/* Stats bar */}
                 <div className="bg-blue-950/60 p-3 sm:p-4 border-t border-blue-900/30 grid grid-cols-3 gap-4">
                   <div className="text-center">
-                    <div className="text-xs text-muted-foreground">Questions</div>
-                    <div className="text-sm sm:text-xl font-semibold text-blue-400">10</div>
+                    <div className="text-xs text-muted-foreground">
+                      Questions
+                    </div>
+                    <div className="text-sm sm:text-xl font-semibold text-blue-400">
+                      10
+                    </div>
                   </div>
                   <div className="text-center">
                     <div className="text-xs text-muted-foreground">Time</div>
-                    <div className="text-sm sm:text-xl font-semibold text-blue-400">15 min</div>
+                    <div className="text-sm sm:text-xl font-semibold text-blue-400">
+                      15 min
+                    </div>
                   </div>
                   <div className="text-center">
                     <div className="text-xs text-muted-foreground">Points</div>
-                    <div className="text-sm sm:text-xl font-semibold text-blue-400">100</div>
+                    <div className="text-sm sm:text-xl font-semibold text-blue-400">
+                      100
+                    </div>
                   </div>
                 </div>
               </div>
@@ -216,7 +253,11 @@ export default function Hero() {
           <div className="relative aspect-video w-full">
             <iframe
               className="absolute inset-0 w-full h-full"
-              src={showVideo ? "https://www.youtube.com/embed/dQw4w9WgXcQ?autoplay=1" : ""}
+              src={
+                showVideo
+                  ? "https://www.youtube.com/embed/dQw4w9WgXcQ?autoplay=1"
+                  : ""
+              }
               title="SmartQuiz Demo Video"
               frameBorder="0"
               allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
@@ -244,6 +285,5 @@ export default function Hero() {
         </DialogContent>
       </Dialog>
     </section>
-  )
+  );
 }
-

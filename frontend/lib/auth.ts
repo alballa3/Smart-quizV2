@@ -1,4 +1,4 @@
-export const session = async () => {
+export const useSession = async () => {
   const response = await fetch(
     `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/users/session`,
     {
